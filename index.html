@@ -69,7 +69,7 @@
     </div>
     <script>
         let time = 7200;
-        let interval;
+        let interval = null;
         let isRunning = false;
         const startButton = document.getElementById("start");
 
@@ -80,37 +80,44 @@
             document.getElementById("timer").textContent = `${hours}:${minutes}:${seconds}`;
         }
 
+        function startTimer() {
+            if (interval) return; // Prevent multiple intervals
+
+            interval = setInterval(() => {
+                if (time > 0) {
+                    time--;
+                    updateDisplay();
+                } else {
+                    stopTimer(); // Stop when reaching 0
+                }
+            }, 1000);
+            startButton.textContent = "Stop";
+            isRunning = true;
+        }
+
+        function stopTimer() {
+            clearInterval(interval);
+            interval = null;
+            startButton.textContent = "Start";
+            isRunning = false;
+        }
+
         function toggleTimer() {
             if (isRunning) {
-                clearInterval(interval);
-                interval = null;
-                startButton.textContent = "Start";
+                stopTimer();
             } else {
-                interval = setInterval(() => {
-                    if (time > 0) {
-                        time--;
-                        updateDisplay();
-                    } else {
-                        clearInterval(interval);
-                        interval = null;
-                        startButton.textContent = "Start";
-                        isRunning = false;
-                    }
-                }, 1000);
-                startButton.textContent = "Stop";
+                startTimer();
             }
-            isRunning = !isRunning;
         }
 
         function resetTimer() {
-            clearInterval(interval);
-            interval = null;
-            isRunning = false;
-            startButton.textContent = "Start";
-            time = document.querySelector(".active").id === "focus" ? 7200 : document.querySelector(".active").id === "shortBreak" ? 600 : 1200;
+            stopTimer(); // Ensure timer stops completely
+            let activeButton = document.querySelector(".active").id;
+            time = activeButton === "focus" ? 7200 : activeButton === "shortBreak" ? 600 : 1200;
             updateDisplay();
         }
 
+        // Event Listeners
         startButton.addEventListener("click", toggleTimer);
         document.getElementById("reset").addEventListener("click", resetTimer);
 
@@ -118,7 +125,6 @@
             button.addEventListener("click", function() {
                 document.querySelector(".active").classList.remove("active");
                 this.classList.add("active");
-                time = this.id === "focus" ? 7200 : this.id === "shortBreak" ? 600 : 1200;
                 resetTimer();
             });
         });
