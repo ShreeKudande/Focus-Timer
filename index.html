@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOCUS</title>
+    <link rel="icon" type="image/x-icon" href="pomodoro.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .timer-buttons button {
+            color: rgb(55, 53, 47);
+            background-color: rgb(241, 241, 239);
+            border-color: rgb(55, 53, 47);
+            border-radius: 50px;
+            border: 1px solid black;
+            font-family: "Rubik", sans-serif;
+            font-size: 1rem;
+            margin: 0.313rem;
+            padding: 0.313rem 0.5rem;
+            text-align: center;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .timer-buttons button.active {
+            background: black;
+            color: white;
+        }
+        #timer {
+            color: rgb(55, 53, 47);
+            font-family: "Karla", sans-serif;
+            font-size: 10.375rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            letter-spacing: -5px;
+        }
+        .controls button {
+            border-radius: 50px;
+            border: 1px solid black;
+            color: black;
+            font-family: "Rubik", sans-serif;
+            font-size: 1rem;
+            margin: 0.313rem;
+            padding: 0.313rem 0.5rem;
+            text-align: center;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-buttons">
+        <button id="shortBreak">Short Break</button>
+        <button id="focus" class="active">Focus</button>
+        <button id="longBreak">Long Break</button>
+    </div>
+    <div id="timer">02:00:00</div>
+    <div class="controls">
+        <button id="start">Start</button>
+        <button id="reset">&#x21bb;</button>
+    </div>
+    <script>
+        let time = 7200;
+        let interval;
+        let isRunning = false;
+        const startButton = document.getElementById("start");
+
+        function updateDisplay() {
+            let hours = Math.floor(time / 3600).toString().padStart(2, '0');
+            let minutes = Math.floor((time % 3600) / 60).toString().padStart(2, '0');
+            let seconds = (time % 60).toString().padStart(2, '0');
+            document.getElementById("timer").textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(interval);
+                interval = null;
+                startButton.textContent = "Start";
+            } else {
+                interval = setInterval(() => {
+                    if (time > 0) {
+                        time--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(interval);
+                        interval = null;
+                        startButton.textContent = "Start";
+                        isRunning = false;
+                    }
+                }, 1000);
+                startButton.textContent = "Stop";
+            }
+            isRunning = !isRunning;
+        }
+
+        function resetTimer() {
+            clearInterval(interval);
+            interval = null;
+            isRunning = false;
+            startButton.textContent = "Start";
+            time = document.querySelector(".active").id === "focus" ? 7200 : document.querySelector(".active").id === "shortBreak" ? 600 : 1200;
+            updateDisplay();
+        }
+
+        startButton.addEventListener("click", toggleTimer);
+        document.getElementById("reset").addEventListener("click", resetTimer);
+
+        document.querySelectorAll(".timer-buttons button").forEach(button => {
+            button.addEventListener("click", function() {
+                document.querySelector(".active").classList.remove("active");
+                this.classList.add("active");
+                time = this.id === "focus" ? 7200 : this.id === "shortBreak" ? 600 : 1200;
+                resetTimer();
+            });
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
