@@ -68,8 +68,8 @@
         <button id="reset">&#x21bb;</button>
     </div>
     <script>
-        let time = 7200;
-        let interval = null;
+        let time = 7200; 
+        let startTime = null; 
         let isRunning = false;
         const startButton = document.getElementById("start");
 
@@ -81,25 +81,32 @@
         }
 
         function startTimer() {
-            if (interval) return; // Prevent multiple intervals
-
-            interval = setInterval(() => {
-                if (time > 0) {
-                    time--;
-                    updateDisplay();
-                } else {
-                    stopTimer(); // Stop when reaching 0
-                }
-            }, 1000);
-            startButton.textContent = "Stop";
+            if (isRunning) return;
             isRunning = true;
+            startTime = Date.now();
+            let endTime = startTime + time * 1000;
+
+            function timerLoop() {
+                if (!isRunning) return;
+
+                let now = Date.now();
+                time = Math.max(0, Math.round((endTime - now) / 1000));
+                updateDisplay();
+
+                if (time > 0) {
+                    requestAnimationFrame(timerLoop);
+                } else {
+                    stopTimer();
+                }
+            }
+
+            requestAnimationFrame(timerLoop);
+            startButton.textContent = "Stop";
         }
 
         function stopTimer() {
-            clearInterval(interval);
-            interval = null;
-            startButton.textContent = "Start";
             isRunning = false;
+            startButton.textContent = "Start";
         }
 
         function toggleTimer() {
@@ -111,7 +118,7 @@
         }
 
         function resetTimer() {
-            stopTimer(); // Ensure timer stops completely
+            stopTimer();
             let activeButton = document.querySelector(".active").id;
             time = activeButton === "focus" ? 7200 : activeButton === "shortBreak" ? 600 : 1200;
             updateDisplay();
